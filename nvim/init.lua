@@ -239,12 +239,13 @@ require("lazy").setup({
 			"antoinemadec/FixCursorHold.nvim",
 			"nvim-treesitter/nvim-treesitter", -- Syntax highlighting and parsing
 			"fredrikaverpil/neotest-golang", -- Adapter for Go tests
+			"nvim-neotest/neotest-python",
 		},
 		config = function()
 			-- Setup function for configuring neotest
 			require("neotest").setup({
 				adapters = {
-					require("neotest-golang"),
+					require("neotest-python")({}),
 				},
 			})
 
