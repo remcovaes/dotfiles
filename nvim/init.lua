@@ -95,6 +95,7 @@ vim.g.have_nerd_font = false
 
 -- Custom settings
 vim.opt.tabstop = 4
+vim.opt.relativenumber = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -246,6 +247,7 @@ require("lazy").setup({
 			require("neotest").setup({
 				adapters = {
 					require("neotest-python")({}),
+					require("neotest-golang")({}),
 				},
 			})
 
@@ -424,6 +426,7 @@ require("lazy").setup({
 			},
 		},
 	},
+	{ "akinsho/git-conflict.nvim", version = "*", config = true },
 
 	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
 	--
