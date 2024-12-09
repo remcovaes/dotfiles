@@ -414,7 +414,7 @@ require("lazy").setup({
 	--    require('gitsigns').setup({ ... })
 	--
 	-- See `:help gitsigns` to understand what the configuration keys do
-	{ -- Adds git related signs to the gutter, as well as utilities for managing changes
+	{
 		"lewis6991/gitsigns.nvim",
 		opts = {
 			signs = {
@@ -425,6 +425,61 @@ require("lazy").setup({
 				changedelete = { text = "~" },
 			},
 		},
+		config = function()
+			require("gitsigns").setup({
+				on_attach = function(bufnr)
+					local gitsigns = require("gitsigns")
+
+					local function map(mode, lhs, rhs, desc)
+						vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+					end
+
+					-- Navigation
+					map("n", "]c", function()
+						if vim.wo.diff then
+							vim.cmd.normal({ "]c", bang = true })
+						else
+							gitsigns.nav_hunk("next")
+						end
+					end, "Go to Next Hunk")
+
+					map("n", "[c", function()
+						if vim.wo.diff then
+							vim.cmd.normal({ "[c", bang = true })
+						else
+							gitsigns.nav_hunk("prev")
+						end
+					end, "Go to Previous Hunk")
+
+					-- Actions
+					map("n", "<leader>hs", gitsigns.stage_hunk, "Stage Hunk")
+					map("n", "<leader>hr", gitsigns.reset_hunk, "Reset Hunk")
+					map("v", "<leader>hs", function()
+						gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+					end, "Stage Hunk (Visual)")
+
+					map("v", "<leader>hr", function()
+						gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+					end, "Reset Hunk (Visual)")
+
+					map("n", "<leader>hS", gitsigns.stage_buffer, "Stage Buffer")
+					map("n", "<leader>hu", gitsigns.undo_stage_hunk, "Undo Stage Hunk")
+					map("n", "<leader>hR", gitsigns.reset_buffer, "Reset Buffer")
+					map("n", "<leader>hp", gitsigns.preview_hunk, "Preview Hunk")
+					map("n", "<leader>hb", function()
+						gitsigns.blame_line({ full = true })
+					end, "Blame Line")
+
+					map("n", "<leader>hd", gitsigns.diffthis, "Diff This")
+					map("n", "<leader>hD", function()
+						gitsigns.diffthis("~")
+					end, "Diff This (~)")
+
+					-- Text object
+					map({ "o", "x" }, "ih", [[:<C-U>Gitsigns select_hunk<CR>]], "Select Hunk")
+				end,
+			})
+		end,
 	},
 	{ "akinsho/git-conflict.nvim", version = "*", config = true },
 
@@ -801,9 +856,14 @@ require("lazy").setup({
 				--    https://github.com/pmizio/typescript-tools.nvim
 				--
 				-- But for many setups, the LSP (`ts_ls`) will work just fine
-				-- ts_ls = {},
+				ts_ls = {},
 				--
-
+				eslint = {
+					settings = {
+						-- helps eslint find the eslintrc when it's placed in a subfolder instead of the cwd root
+						workingDirectories = { mode = "auto" },
+					},
+				},
 				lua_ls = {
 					-- cmd = {...},
 					-- filetypes = { ...},
