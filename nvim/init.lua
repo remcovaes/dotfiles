@@ -247,7 +247,7 @@ require("lazy").setup({
 			require("neotest").setup({
 				adapters = {
 					require("neotest-python")({}),
-					require("neotest-golang")({}),
+					-- require("neotest-golang")({}),
 				},
 			})
 
@@ -304,6 +304,7 @@ require("lazy").setup({
 			"nvim-neotest/nvim-nio",
 			"williamboman/mason.nvim",
 			"leoluz/nvim-dap-go",
+			"mfussenegger/nvim-dap-python",
 		},
 		config = function()
 			local dap = require("dap")
@@ -311,7 +312,7 @@ require("lazy").setup({
 
 			require("dapui").setup()
 			require("dap-go").setup()
-
+			require("dap-python").setup()
 			require("nvim-dap-virtual-text").setup()
 
 			-- Handled by nvim-dap-go
@@ -381,7 +382,7 @@ require("lazy").setup({
 			end, { desc = "Widgets" })
 
 			vim.keymap.set("n", "<leader>td", function()
-				require("dap-go").debug_test()
+				require("dap-python").test_method()
 			end, { desc = "Debug test" })
 
 			dap.listeners.before.attach.dapui_config = function()
@@ -931,7 +932,7 @@ require("lazy").setup({
 				-- Disable "format_on_save lsp_fallback" for languages that don't
 				-- have a well standardized coding style. You can add additional
 				-- languages here or re-enable it for the disabled ones.
-				local disable_filetypes = { c = true, cpp = true }
+				local disable_filetypes = { c = true, cpp = true, ts_ls = true, eslint = true }
 				local lsp_format_opt
 				if disable_filetypes[vim.bo[bufnr].filetype] then
 					lsp_format_opt = "never"
