@@ -235,9 +235,17 @@ vim.opt.rtp:prepend(lazypath)
 --    :Lazy update
 --
 -- NOTE: Here is where you install your plugins.
+vim.keymap.set("i", "<C-J>", 'copilot#Accept("\\<CR>")', {
+	expr = true,
+	replace_keycodes = false,
+})
+vim.g.copilot_no_tab_map = true
+
 require("lazy").setup({
 	{
 		"github/copilot.vim",
+	},
+	{
 		"nvim-neotest/neotest",
 		dependencies = {
 			"nvim-neotest/nvim-nio",
@@ -1090,6 +1098,7 @@ require("lazy").setup({
 						-- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
 						group_index = 0,
 					},
+					{ name = "copilot" },
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "path" },
