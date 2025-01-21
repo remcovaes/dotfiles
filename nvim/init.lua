@@ -91,7 +91,8 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
+vim.o.termguicolors = true
 
 -- Custom settings
 vim.opt.tabstop = 4
@@ -198,6 +199,8 @@ vim.keymap.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right win
 vim.keymap.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
 vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
+vim.keymap.set("n", "<M-j>", "<cmd>cnext<CR>", { desc = "Move to the next quickfix item" })
+vim.keymap.set("n", "<M-k>", "<cmd>cprev<CR>", { desc = "Move to the previous quickfix item" })
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
