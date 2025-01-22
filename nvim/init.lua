@@ -1260,5 +1260,17 @@ require("lazy").setup({
 	},
 })
 
+-- Configure nvim-lint for Python using pylint
+require("lint").linters_by_ft = {
+	python = { "pylint" }, -- Use 'pylint' as the linter for Python files
+}
+
+-- Set up an autocmd to trigger linting on Python file write
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+	pattern = "*.py", -- Only trigger for Python files
+	callback = function()
+		require("lint").try_lint() -- Attempt linting on buffer write
+	end,
+})
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
