@@ -311,6 +311,7 @@ require("lazy").setup({
 			end, { desc = "Toggle Watch (Neotest)", noremap = true, silent = true })
 		end,
 	},
+	"mfussenegger/nvim-lint",
 	{
 		"mfussenegger/nvim-dap",
 		dependencies = {
