@@ -128,7 +128,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
-
 require("config.lazy")
 
 vim.keymap.set("i", "<C-J>", 'copilot#Accept("\\<CR>")', {
