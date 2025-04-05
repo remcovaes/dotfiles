@@ -541,21 +541,21 @@ return {
 					-- This may be unwanted, since they displace some of your code
 					-- if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
 					-- 	map("<leader>th", function()
-					-- 		vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
+					-- 		vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))lsp
 					-- 	end, "[T]oggle Inlay [H]ints")
 					-- end
 				end,
 			})
 
 			-- Change diagnostic symbols in the sign column (gutter)
-			-- if vim.g.have_nerd_font then
-			--   local signs = { Error = '', Warn = '', Hint = '', Info = '' }
-			--   for type, icon in pairs(signs) do
-			--     local hl = 'DiagnosticSign' .. type
-			--     vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-			--   end
-			-- end
-
+			if vim.g.have_nerd_font then
+			  local signs = { Error = '', Warn = '', Hint = '', Info = '' }
+			  for type, icon in pairs(signs) do
+			    local hl = 'DiagnosticSign' .. type
+			    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+			  end
+			end
+			--
 			-- LSP servers and clients are able to communicate to each other what features they support.
 			--  By default, Neovim doesn't support everything that is in the LSP specification.
 			--  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
@@ -575,15 +575,17 @@ return {
 			local servers = {
 				-- clangd = {},
 				gopls = {},
-				pylsp = {
-					pylsp = {
-						plugins = {
-							pylsp_rope = {
-								enabled = true,
-							},
-						},
-					},
-				},
+				pyright = {},
+
+				-- pylsp = {
+				-- 	pylsp = {
+				-- 		plugins = {
+				-- 			pylsp_rope = {
+				-- 				enabled = true,
+				-- 			},
+				-- 		},
+				-- 	},
+				-- },
 				-- rust_analyzer = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
 				--
@@ -593,12 +595,12 @@ return {
 				-- But for many setups, the LSP (`ts_ls`) will work just fine
 				ts_ls = {},
 				--
-				eslint = {
-					settings = {
-						-- helps eslint find the eslintrc when it's placed in a subfolder instead of the cwd root
-						workingDirectories = { mode = "auto" },
-					},
-				},
+				-- eslint = {
+				-- 	settings = {
+				-- 		-- helps eslint find the eslintrc when it's placed in a subfolder instead of the cwd root
+				-- 		workingDirectories = { mode = "auto" },
+				-- 	},
+				-- },
 				lua_ls = {
 					-- cmd = {...},
 					-- filetypes = { ...},
@@ -627,6 +629,7 @@ return {
 			-- for you, so that they are available from within Neovim.
 			local ensure_installed = vim.tbl_keys(servers or {})
 			vim.list_extend(ensure_installed, {
+				"debugpy",
 				"stylua", -- Used to format Lua code
 			})
 			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })

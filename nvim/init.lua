@@ -89,6 +89,10 @@ vim.keymap.set("n", "<leader>qc", function()
 	vim.diagnostic.open_float({ scope = "line" })
 end, { desc = "Open diagnostic float" })
 
+vim.diagnostic.config({
+	virtual_text = true,
+})
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -140,3 +144,5 @@ vim.g.copilot_no_tab_map = true
 require("lint").linters_by_ft = {
 	python = { "pylint" }, -- Use 'pylint' as the linter for Python files
 }
+
+vim.keymap.set("n", "<leader>a", require("config.lspimport").import, { noremap = true })
