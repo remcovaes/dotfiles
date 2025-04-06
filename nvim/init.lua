@@ -146,3 +146,4 @@ require("lint").linters_by_ft = {
 }
 
 vim.keymap.set("n", "<leader>a", require("config.lspimport").import, { noremap = true })
+
