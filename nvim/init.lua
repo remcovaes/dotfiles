@@ -145,5 +145,3 @@ require("lint").linters_by_ft = {
 	python = { "pylint" }, -- Use 'pylint' as the linter for Python files
 }
 
-vim.keymap.set("n", "<leader>a", require("config.lspimport").import, { noremap = true })
-
