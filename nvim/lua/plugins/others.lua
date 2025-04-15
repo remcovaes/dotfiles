@@ -1,4 +1,5 @@
 return {
+	"remcovaes/nvim-python-lsp-imports",
 	{
 		"mfussenegger/nvim-dap",
 		dependencies = {
