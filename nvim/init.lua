@@ -143,5 +143,12 @@ vim.g.copilot_no_tab_map = true
 -- Configure nvim-lint for Python using pylint
 require("lint").linters_by_ft = {
 	python = { "pylint" }, -- Use 'pylint' as the linter for Python files
+
 }
 
+vim.api.nvim_create_autocmd("BufWritePost", {
+	callback = function()
+		require("lint").try_lint()
+		require("lint").try_lint("cspell")
+	end,
+})
