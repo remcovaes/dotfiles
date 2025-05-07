@@ -58,5 +58,9 @@ return {
 		vim.keymap.set("n", "<leader>tw", function()
 			neotest.watch.toggle(vim.fn.expand("%"))
 		end, { desc = "Toggle Watch (Neotest)", noremap = true, silent = true })
+		
+		vim.keymap.set("n", "<leader>td", function()
+			neotest.run.run({ strategy = "dap" })
+		end, { desc = "Debug Test (Neotest)", noremap = true, silent = true })
 	end,
 }

@@ -86,9 +86,6 @@ return {
 				require("dap.ui.widgets").hover()
 			end, { desc = "Widgets" })
 
-			vim.keymap.set("n", "<leader>td", function()
-				require("dap-python").test_method()
-			end, { desc = "Debug test" })
 			dap.listeners.before.attach.dapui_config = function()
 				ui.open()
 			end
