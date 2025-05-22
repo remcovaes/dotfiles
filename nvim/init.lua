@@ -119,6 +119,9 @@ vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper win
 
 vim.keymap.set("n", "<M-j>", "<cmd>cnext<CR>", { desc = "Move to the next quickfix item" })
 vim.keymap.set("n", "<M-k>", "<cmd>cprev<CR>", { desc = "Move to the previous quickfix item" })
+
+vim.keymap.set("v", "<leader>p", "\"_dP", { desc = "Paste over selected text without losing it" })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
