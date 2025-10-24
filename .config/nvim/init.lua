@@ -4,6 +4,7 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- aardappel
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 vim.o.termguicolors = true
@@ -120,7 +121,7 @@ vim.keymap.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper win
 vim.keymap.set("n", "<M-j>", "<cmd>cnext<CR>", { desc = "Move to the next quickfix item" })
 vim.keymap.set("n", "<M-k>", "<cmd>cprev<CR>", { desc = "Move to the previous quickfix item" })
 
-vim.keymap.set("v", "<leader>p", "\"_dP", { desc = "Paste over selected text without losing it" })
+vim.keymap.set("v", "<leader>p", '"_dP', { desc = "Paste over selected text without losing it" })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -146,12 +147,22 @@ vim.g.copilot_no_tab_map = true
 -- Configure nvim-lint for Python using pylint
 require("lint").linters_by_ft = {
 	python = { "pylint" }, -- Use 'pylint' as the linter for Python files
-
 }
+
+vim.treesitter.language.register("html", { "jinja" })
 
 vim.api.nvim_create_autocmd("BufWritePost", {
 	callback = function()
 		require("lint").try_lint()
-		require("lint").try_lint("cspell")
+		-- require("lint").try_lint("cspell")
 	end,
+})
+
+-- vim.opt.spell = true
+-- vim.opt.spelllang = { "en_us", "nl" }
+
+require("oil").setup({
+	buf_options = {
+		bufhidden = "hide",
+	},
 })
