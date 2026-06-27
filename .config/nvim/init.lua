@@ -1,32 +1,13 @@
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- aardappel
--- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 vim.o.termguicolors = true
 
--- Custom settings
 vim.opt.tabstop = 4
 vim.opt.relativenumber = true
 
--- [[ Setting options ]]
--- See `:help vim.opt`
--- NOTE: You can change these options as you wish!
---  For more options, you can see `:help option-list`
-
--- Make line numbers default
 vim.opt.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
-
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = "a"
-
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
@@ -62,6 +43,8 @@ vim.opt.timeoutlen = 300
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 
+vim.opt.lazyredraw = true
+
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
@@ -92,6 +75,9 @@ end, { desc = "Open diagnostic float" })
 
 vim.diagnostic.config({
 	virtual_text = true,
+	jump = {
+		severity = { min = vim.diagnostic.severity.WARN },
+	},
 })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -138,31 +124,56 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 require("config.lazy")
 
-vim.keymap.set("i", "<C-J>", 'copilot#Accept("\\<CR>")', {
-	expr = true,
-	replace_keycodes = false,
-})
-vim.g.copilot_no_tab_map = true
-
--- Configure nvim-lint for Python using pylint
-require("lint").linters_by_ft = {
-	python = { "pylint" }, -- Use 'pylint' as the linter for Python files
-}
+-- require("lint").linters_by_ft = {
+-- 	python = { "pylint" },
+-- }
 
 vim.treesitter.language.register("html", { "jinja" })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
-	callback = function()
-		require("lint").try_lint()
-		-- require("lint").try_lint("cspell")
-	end,
-})
+-- vim.api.nvim_create_autocmd("BufWritePost", {
+-- 	callback = function()
+-- 		require("lint").try_lint()
+-- 	end,
+-- })
+--
+--
+-- Subtle column indicators at 80 and 100 using virtual text
+local ns = vim.api.nvim_create_namespace("column_guides")
 
--- vim.opt.spell = true
--- vim.opt.spelllang = { "en_us", "nl" }
+local columns = { 80, 100 } -- columns to mark
+local char = "·" -- or "│", "⸽", " " with bg color, etc.
+local hl_name = "ColumnGuide"
+
+-- Define a very subtle highlight group
+vim.api.nvim_set_hl(0, hl_name, { fg = "#3b3b3b", nocombine = true }) -- tweak fg
 
 require("oil").setup({
 	buf_options = {
 		bufhidden = "hide",
 	},
+})
+
+function argsInTelescope()
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+
+	local args = vim.cmd.args()
+	pickers
+		.new({}, {
+			prompt_title = "Args",
+			finder = finders.new_table({ results = { "test" } }),
+		})
+		:find()
+end
+
+-- init.lua
+vim.api.nvim_create_augroup("DadbodUiIndent", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+	group = "DadbodUiIndent",
+	pattern = "dbui",
+	callback = function()
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.softtabstop = 2
+		vim.opt_local.tabstop = 2
+	end,
 })

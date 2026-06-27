@@ -1,5 +1,3 @@
--- aardappel
--- appell
 return {
   {
     "nvimtools/none-ls.nvim",

@@ -12,7 +12,13 @@ return {
 		-- Setup function for configuring neotest
 		require("neotest").setup({
 			adapters = {
-				require("neotest-python")({}),
+				require("neotest-python")({
+					dap = {
+						justMyCode = true,
+						stopOnEntry = false,
+					},
+					args = { "-vv", "-s" },
+				}),
 			},
 		})
 
@@ -58,9 +64,38 @@ return {
 		vim.keymap.set("n", "<leader>tw", function()
 			neotest.watch.toggle(vim.fn.expand("%"))
 		end, { desc = "Toggle Watch (Neotest)", noremap = true, silent = true })
-		
+
 		vim.keymap.set("n", "<leader>td", function()
-			neotest.run.run({ strategy = "dap" })
+			require("dap-python").test_method({
+				test_runner = "pytest",
+				config = function(config)
+					config.args = vim.list_extend({ "--headed" }, config.args or {})
+					return config
+				end,
+			})
 		end, { desc = "Debug Test (Neotest)", noremap = true, silent = true })
+
+		vim.keymap.set("n", "<leader>tk", function()
+			local expr = vim.trim(vim.fn.input("pytest -k: "))
+
+			if expr == "" then
+				vim.notify("No pytest -k expression given", vim.log.levels.WARN)
+				return
+			end
+
+			require("dap").run({
+				type = "python",
+				request = "launch",
+				name = "pytest -k " .. expr,
+				module = "pytest",
+				args = {
+					"--headed",
+					"-k",
+					expr,
+				},
+				console = "integratedTerminal",
+				cwd = vim.fn.getcwd(),
+			})
+		end, { desc = "Pytest -k across suite" })
 	end,
 }

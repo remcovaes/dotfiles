@@ -1,5 +1,8 @@
 return {
-	"remcovaes/nvim-python-lsp-imports",
+	{
+		"remcovaes/nvim-python-lsp-imports",
+		-- dev= true,
+	},
 	{
 		"mfussenegger/nvim-dap",
 		dependencies = {
@@ -31,6 +34,20 @@ return {
 			}
 
 			vim.keymap.set("n", "<space>b", dap.toggle_breakpoint)
+
+			local user_unhandled = true
+
+			dap.listeners.after.event_initialized["dap_exception_breakpoint"] = function()
+				dap.set_exception_breakpoints(user_unhandled and { "userUnhandled" } or {})
+			end
+
+			vim.api.nvim_create_user_command("DapUserUnhandledEnable", function()
+				user_unhandled = true
+			end, {})
+
+			vim.api.nvim_create_user_command("DapUserUnhandledDisable", function()
+				user_unhandled = false
+			end, {})
 
 			-- Eval var under cursor
 			vim.keymap.set("n", "<space>?", function()
@@ -182,23 +199,6 @@ return {
 			})
 		end,
 	},
-	{ "akinsho/git-conflict.nvim", version = "*", config = true },
-
-	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
-	--
-	-- This is often very useful to both group configuration, as well as handle
-	-- lazy loading plugins that don't need to be loaded immediately at startup.
-	--
-	-- For example, in the following configuration, we use:
-	--  event = 'VimEnter'
-	--
-	-- which loads which-key before all the UI elements are loaded. Events can be
-	-- normal autocommands events (`:help autocmd-events`).
-	--
-	-- Then, because we use the `config` key, the configuration only runs
-	-- after the plugin has been loaded:
-	--  config = function() ... end
-
 	{ -- Useful plugin to show you pending keybinds.
 		"folke/which-key.nvim",
 		event = "VimEnter", -- Sets the loading event to 'VimEnter'
@@ -320,15 +320,15 @@ return {
 				--
 				defaults = {
 					layout_config = {
-						horizontal = { 
+						horizontal = {
 							preview_width = 0.40,
 						},
 						width = 0.95,
 					},
-					
-				--   mappings = {
-				--     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-				--   },
+
+					--   mappings = {
+					--     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+					--   },
 				},
 				-- pickers = {}
 				extensions = {
@@ -337,15 +337,18 @@ return {
 					},
 					live_grep_args = {
 						auto_quoting = true, -- enable/disable auto-quoting
+
 						-- define mappings, e.g.
 						mappings = { -- extend mappings
 							i = {
 								["<C-k>"] = lga_actions.quote_prompt(),
 								["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+								["<C-h>"] = lga_actions.quote_prompt({ postfix = " -. " }),
 								-- freeze the current list and start a fuzzy search in the frozen list
 								["<C-space>"] = lga_actions.to_fuzzy_refine,
 							},
 						},
+						hidden = true,
 						-- ... also accepts theme settings, for example:
 						-- theme = "dropdown", -- use dropdown theme
 						-- theme = { }, -- use own theme spec
@@ -370,6 +373,9 @@ return {
 			vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
 			vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
 			-- vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
+			--
+			vim.keymap.set("n", "<leader>sj", builtin.jumplist, { desc = "[S]earch [J]umplist" })
+
 			vim.keymap.set(
 				"n",
 				"<leader>sg",
@@ -564,11 +570,21 @@ return {
 
 			-- Change diagnostic symbols in the sign column (gutter)
 			if vim.g.have_nerd_font then
-				local signs = { Error = "", Warn = "", Hint = "", Info = "" }
-				for type, icon in pairs(signs) do
-					local hl = "DiagnosticSign" .. type
-					vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-				end
+				-- 	local signs = { Error = "", Warn = "", Hint = "", Info = "" }
+				-- 	for type, icon in pairs(signs) do
+				-- 		local hl = "DiagnosticSign" .. type
+				-- 		vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+				-- 	end
+				vim.diagnostic.config({
+					signs = {
+						text = {
+							[vim.diagnostic.severity.ERROR] = "",
+							[vim.diagnostic.severity.WARN] = "",
+							[vim.diagnostic.severity.HINT] = "",
+							[vim.diagnostic.severity.INFO] = "",
+						},
+					},
+				})
 			end
 			--
 			-- LSP servers and clients are able to communicate to each other what features they support.
@@ -590,8 +606,8 @@ return {
 			local servers = {
 				-- clangd = {},
 				gopls = {},
-				pyright = {},
-
+				ty = {},
+				ruff = {},
 				-- pylsp = {
 				-- 	pylsp = {
 				-- 		plugins = {
@@ -609,9 +625,6 @@ return {
 				--
 				-- But for many setups, the LSP (`ts_ls`) will work just fine
 				ts_ls = {},
-				jinja_lsp = {
-					filetypes = { "jinja", "html" },
-				},
 				-- eslint = {
 				-- 	settings = {
 				-- 		-- helps eslint find the eslintrc when it's placed in a subfolder instead of the cwd root
@@ -681,7 +694,7 @@ return {
 			},
 		},
 		opts = {
-			notify_on_error = false,
+			notify_on_error = true,
 			-- format_on_save = function(bufnr)
 			-- 	-- Disable "format_on_save lsp_fallback" for languages that don't
 			-- 	-- have a well standardized coding style. You can add additional
@@ -700,8 +713,10 @@ return {
 			-- end,
 			formatters_by_ft = {
 				lua = { "stylua" },
-				python = { "isort", "ruff_format" },
-				jinja = { "djlint" },
+				python = {
+					"isort",
+					-- "ruff_format"
+				},
 				-- Conform can also run multiple formatters sequentially
 				--
 				-- You can use 'stop_after_first' to run the first available formatter from the list
@@ -710,35 +725,13 @@ return {
 		},
 	},
 
+	-- { "saadparwaiz1/cmp_luasnip" },
+
 	{ -- Autocompletion
 		"hrsh7th/nvim-cmp",
 		event = "InsertEnter",
 		dependencies = {
-			-- Snippet Engine & its associated nvim-cmp source
-			{
-				"L3MON4D3/LuaSnip",
-				build = (function()
-					-- Build Step is needed for regex support in snippets.
-					-- This step is not supported in many windows environments.
-					-- Remove the below condition to re-enable on windows.
-					if vim.fn.has("win32") == 1 or vim.fn.executable("make") == 0 then
-						return
-					end
-					return "make install_jsregexp"
-				end)(),
-				dependencies = {
-					-- `friendly-snippets` contains a variety of premade snippets.
-					--    See the README about individual language/framework/plugin snippets:
-					--    https://github.com/rafamadriz/friendly-snippets
-					-- {
-					--   'rafamadriz/friendly-snippets',
-					--   config = function()
-					--     require('luasnip.loaders.from_vscode').lazy_load()
-					--   end,
-					-- },
-				},
-			},
-			"saadparwaiz1/cmp_luasnip",
+			-- "saadparwaiz1/cmp_luasnip",
 
 			-- Adds other completion capabilities.
 			--  nvim-cmp does not ship with all sources by default. They are split
@@ -749,15 +742,29 @@ return {
 		config = function()
 			-- See `:help cmp`
 			local cmp = require("cmp")
-			local luasnip = require("luasnip")
-			luasnip.config.setup({})
+			-- local luasnip = require("luasnip")
+			-- luasnip.config.setup({})
+			local compare = require("cmp.config.compare")
+
+			local prefer_non_imports = function(entry1, entry2)
+				local label1 = entry1.completion_item.label or ""
+				local label2 = entry2.completion_item.label or ""
+
+				local has_import_1 = string.find(label1, "import")
+				local has_import_2 = string.find(label2, "import")
+
+				if has_import_1 == nil and has_import_2 ~= nil then
+					return true
+				end
+
+				if has_import_1 ~= nil and has_import_2 == nil then
+					return false
+				end
+
+				return nil
+			end
 
 			cmp.setup({
-				snippet = {
-					expand = function(args)
-						luasnip.lsp_expand(args.body)
-					end,
-				},
 				completion = { completeopt = "menu,menuone,noinsert" },
 
 				-- For an understanding of why these mappings were
@@ -798,30 +805,45 @@ return {
 					--
 					-- <c-l> will move you to the right of each of the expansion locations.
 					-- <c-h> is similar, except moving you backwards.
-					["<C-l>"] = cmp.mapping(function()
-						if luasnip.expand_or_locally_jumpable() then
-							luasnip.expand_or_jump()
-						end
-					end, { "i", "s" }),
-					["<C-h>"] = cmp.mapping(function()
-						if luasnip.locally_jumpable(-1) then
-							luasnip.jump(-1)
-						end
-					end, { "i", "s" }),
+					-- ["<C-l>"] = cmp.mapping(function()
+					-- 	if luasnip.expand_or_locally_jumpable() then
+					-- 		luasnip.expand_or_jump()
+					-- 	end
+					-- end, { "i", "s" }),
+					-- ["<C-h>"] = cmp.mapping(function()
+					-- 	if luasnip.locally_jumpable(-1) then
+					-- 		luasnip.jump(-1)
+					-- 	end
+					-- end, { "i", "s" }),
 
 					-- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
 					--    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
 				}),
+				sorting = {
+					comparators = {
+						prefer_non_imports,
+
+						compare.offset,
+						compare.exact,
+						-- compare.scopes,
+						compare.score,
+						compare.recently_used,
+						compare.locality,
+						compare.kind,
+						compare.sort_text,
+						compare.length,
+						compare.order,
+					},
+				},
 				sources = {
 					{
 						name = "lazydev",
 						-- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
 						group_index = 0,
 					},
-					{ name = "copilot" },
 					{ name = "nvim_lsp" },
-					{ name = "luasnip" },
 					{ name = "path" },
+					{ name = "vim-dadbod-completion" },
 				},
 			})
 		end,
@@ -892,6 +914,7 @@ return {
 	},
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
+		branch = "master",
 		build = ":TSUpdate",
 		main = "nvim-treesitter.configs", -- Sets main module to use for opts
 		-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -901,7 +924,7 @@ return {
 				"c",
 				"diff",
 				"html",
-				"jinja",
+				"javascript",
 				"lua",
 				"luadoc",
 				"markdown",
@@ -927,15 +950,6 @@ return {
 		--    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
 		--    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
 		--    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-	},
-	{
-		"iamcco/markdown-preview.nvim",
-		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-		build = "cd app && yarn install",
-		init = function()
-			vim.g.mkdp_filetypes = { "markdown" }
-		end,
-		ft = { "markdown" },
 	},
 	-- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
 	-- init.lua. If you want these files, they are in the repository, so you can just download them and

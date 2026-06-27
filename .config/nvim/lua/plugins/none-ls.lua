@@ -15,12 +15,12 @@ local cspellConfig = {
 return {
 	"nvimtools/none-ls.nvim",
 	config = function()
-		local lspImportSource = require("python-lsp-imports").setup()
+		-- local lspImportSource = require("python-lsp-imports").setup()
 		local cspell = require("cspell")
 
 		require("null-ls").setup({
+			debounce = 1000,
 			sources = {
-				lspImportSource,
 				cspell.diagnostics.with({
 					diagnostics_postprocess = function(diagnostic)
 						diagnostic.severity = vim.diagnostic.severity["INFO"]

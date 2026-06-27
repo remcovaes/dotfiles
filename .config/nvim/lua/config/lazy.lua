@@ -48,4 +48,7 @@ require("lazy").setup({
 			lazy = "💤 ",
 		},
 	},
+	dev = {
+		path = "~/workspaces/"
+	},
 })
